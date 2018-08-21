@@ -20,16 +20,19 @@ class ArticleReader {
 		$this->feed = $this->getFeedContent($feedUrl);
 	}
 	
+	// Add banned words used for articles filtering
 	public function addBannedWords($bannedWords) {
 		$this->bannedWords = array_merge($bannedWords, $this->bannedWords);
 	}
 	
+	// Returns article data prepared to display on the page
 	public function getArticle() {
 		$article = $this->getFirstFiltredArticle($this->feed, $this->bannedWords);
 		
 		return $this->formatArticleData($article);
 	}
 
+	// Check if title contains any banned word from given array
 	private function containsBannedWord($string, $bannedWords) {
 		foreach($bannedWords as $bannedWord) {
 			if(strpos($string, $bannedWord) !== false) {
@@ -40,12 +43,14 @@ class ArticleReader {
 		return false;
 	}
 
+	// Get feed content from given url
 	private function getFeedContent($url) {
 		$content = file_get_contents($url);
 	
 		return new SimpleXmlElement($content);
 	}
 
+	// Get first article from feed which doesn't contain any banned word
 	private function getFirstFiltredArticle($feed, $bannedWords) {
 		foreach($feed->channel->item as $entry) {
 			if($this->containsBannedWord($entry->title, $bannedWords) === false) {
@@ -54,6 +59,7 @@ class ArticleReader {
 		}
 	}
 	
+	// Format article data to make it ready to display on the page
 	private function formatArticleData($articleData) {
 		$article = array(
 			'title' => $articleData->title,
@@ -65,12 +71,14 @@ class ArticleReader {
 		return $article;
 	}
 
+	// Format data string to given format
 	private function formatDate($dateString, $format) {
 		$date = new DateTime($dateString);
 	
 		return $date->format($format);
 	}
 
+	// Change protocol from http/https to relative one
 	private function getUrlWithRelativeProtocol($url) {
 		return str_replace(array('http://', 'https://'), '//', $url);
 	}
